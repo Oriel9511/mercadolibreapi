@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propuesta de Evolución: api-channel-mercadolibre</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .slide {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.6s ease-in-out;
+            min-height: 550px;
+        }
+        .slide.active {
+            display: flex;
+            opacity: 1;
+        }
+        .slide-content {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .mercado-yellow { background-color: #FFF159; }
+        .mercado-blue { color: #3483FA; }
+        .mercado-dark { color: #333333; }
+        .mercado-gray { color: #666666; }
+        .nav-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-button:hover {
+            transform: scale(1.1);
+            background-color: #FFF159;
+            color: #333333;
+        }
+        .progress-bar-fill {
+            transition: width 0.3s ease-in-out;
+        }
+        
+        .card-pillar {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card-pillar:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        
+        /* --- ESTILOS PARA PANTALLA COMPLETA --- */
+        #presentation-container:fullscreen {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            justify-content: center; /* Centrar el contenido verticalmente */
+        }
+        #presentation-container:fullscreen #slides-container {
+            flex-grow: 1; /* Permitir que el contenedor de slides crezca */
+        }
+        #presentation-container:fullscreen .controls-bar {
+            display: none; /* Ocultar la barra de controles */
+        }
+        #presentation-container:fullscreen .slide {
+            align-items: center; /* Asegurar que el contenido del slide esté centrado */
+        }
+        /* Aumentar el tamaño de las fuentes y elementos en pantalla completa */
+        #presentation-container:fullscreen .text-6xl { font-size: 6rem !important; }
+        #presentation-container:fullscreen .text-5xl { font-size: 4.5rem !important; }
+        #presentation-container:fullscreen .text-4xl { font-size: 3.5rem !important; }
+        #presentation-container:fullscreen .text-3xl { font-size: 2.75rem !important; }
+        #presentation-container:fullscreen .text-2xl { font-size: 2rem !important; }
+        #presentation-container:fullscreen .text-xl { font-size: 1.5rem !important; }
+        #presentation-container:fullscreen .text-lg { font-size: 1.25rem !important; }
+        #presentation-container:fullscreen .text-sm { font-size: 1rem !important; }
+        #presentation-container:fullscreen .w-12 { width: 4rem !important; height: 4rem !important; }
+        #presentation-container:fullscreen .w-40 { width: 14rem !important; height: 14rem !important; }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div id="presentation-container" class="w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+        <div id="slides-container" class="relative flex-grow">
+            
+            <!-- Slide 1: Título -->
+            <div id="slide-1" class="slide active flex-col items-center justify-center text-center p-8 bg-gradient-to-br from-yellow-300 to-yellow-400">
+                <div class="slide-content w-full">
+                    <img src="https://http2.mlstatic.com/frontend-assets/ml-web-navigation/ui-navigation/5.21.22/mercadolibre/logo__large_plus.png" alt="Logo Mercado Libre" class="h-16 mx-auto mb-8">
+                    <h1 class="text-4xl md:text-5xl font-extrabold mercado-dark">Propuesta de Evolución Funcional</h1>
+                    <p class="mt-4 text-2xl md:text-3xl font-semibold mercado-gray bg-white/50 px-4 py-2 rounded-lg inline-block">api-channel-mercadolibre</p>
+                </div>
+            </div>
+
+            <!-- Slide 2: Visión y Objetivo General -->
+            <div id="slide-2" class="slide flex-col items-center justify-center p-12">
+                <div class="slide-content w-full max-w-3xl">
+                    <h2 class="text-3xl font-bold mercado-dark text-center mb-8">Visión y Objetivo General</h2>
+                    <p class="text-xl text-center mercado-gray leading-relaxed mb-10">
+                        Evolucionar `api-channel-mercadolibre` de un canal <span class="font-bold text-red-500">reactivo</span> a un panel de control <span class="font-bold text-green-500">proactivo e integral</span> para vendedores.
+                    </p>
+                    <div class="grid md:grid-cols-3 gap-6 text-center">
+                        <div class="bg-gray-50 p-6 rounded-xl">
+                             <svg class="w-12 h-12 mx-auto mercado-blue mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                            <h3 class="text-lg font-semibold mercado-dark">Centralizar Información</h3>
+                        </div>
+                        <div class="bg-gray-50 p-6 rounded-xl">
+                            <svg class="w-12 h-12 mx-auto mercado-blue mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            <h3 class="text-lg font-semibold mercado-dark">Agilizar Decisiones</h3>
+                        </div>
+                        <div class="bg-gray-50 p-6 rounded-xl">
+                            <svg class="w-12 h-12 mx-auto mercado-blue mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                            <h3 class="text-lg font-semibold mercado-dark">Resolver "Pain Points"</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 3: Pilares Estratégicos -->
+            <div id="slide-3" class="slide flex-col items-center justify-center p-12 bg-gray-50">
+                <div class="slide-content w-full max-w-4xl text-center">
+                    <h2 class="text-3xl font-bold mercado-dark mb-10">Pilares Estratégicos de la Evolución</h2>
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="card-pillar bg-white p-8 rounded-2xl shadow-lg">
+                            <h3 class="text-xl font-bold mercado-blue mb-4">Pilar 1</h3>
+                            <p class="text-2xl font-semibold mercado-dark">Base de Datos Proactiva</p>
+                            <p class="mt-3 mercado-gray">Consultar datos activamente, no solo recibirlos.</p>
+                        </div>
+                        <div class="card-pillar bg-white p-8 rounded-2xl shadow-lg">
+                            <h3 class="text-xl font-bold mercado-blue mb-4">Pilar 2</h3>
+                            <p class="text-2xl font-semibold mercado-dark">Centro de Alertas y Disputas</p>
+                            <p class="mt-3 mercado-gray">Ser la primera línea de defensa del vendedor.</p>
+                        </div>
+                        <div class="card-pillar bg-white p-8 rounded-2xl shadow-lg">
+                            <h3 class="text-xl font-bold mercado-blue mb-4">Pilar 3</h3>
+                            <p class="text-2xl font-semibold mercado-dark">Herramientas de Gestión</p>
+                            <p class="mt-3 mercado-gray">Simplificar tareas manuales y repetitivas.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 4: Pilar 1 Title -->
+             <div id="slide-4" class="slide flex-col items-center justify-center text-center p-8 bg-blue-500 text-white">
+                <div class="slide-content w-full">
+                    <h2 class="text-4xl font-bold mb-4">Pilar 1: Base de Datos Proactiva</h2>
+                    <p class="text-xl max-w-3xl mx-auto">Enriquecer el contexto de la aplicación, permitiéndole consultar información histórica y de perfil que es fundamental para todas las demás funcionalidades.</p>
+                </div>
+            </div>
+
+            <!-- Slide 5: Funcionalidad 1.1 -->
+            <div id="slide-5" class="slide items-center justify-center p-12">
+                <div class="slide-content grid md:grid-cols-2 gap-12 items-center">
+                    <div class="text-center">
+                        <svg class="w-40 h-40 mx-auto text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 012-2h4a2 2 0 012 2v1m-4 0h4"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold mercado-dark mb-4">1.1: Contexto del Vendedor</h3>
+                        <div class="mb-6">
+                            <p class="font-semibold text-red-600">Problema Actual:</p>
+                            <p class="mercado-gray">La aplicación no conoce la identidad completa del usuario, impidiendo consultas proactivas.</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-green-600">Funcionalidades Clave:</p>
+                            <ul class="list-disc list-inside mercado-gray space-y-2 mt-2">
+                                <li>Obtener y almacenar automáticamente el perfil del vendedor al autenticarse.</li>
+                                <li>Utilizar el ID del vendedor para todas las futuras llamadas a la API.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 6: Funcionalidad 1.2 -->
+            <div id="slide-6" class="slide items-center justify-center p-12 bg-gray-50">
+                <div class="slide-content grid md:grid-cols-2 gap-12 items-center">
+                     <div>
+                        <h3 class="text-3xl font-bold mercado-dark mb-4">1.2: Búsqueda Avanzada de Órdenes</h3>
+                        <div class="mb-6">
+                            <p class="font-semibold text-red-600">Problema Actual:</p>
+                            <p class="mercado-gray">Imposible buscar órdenes antiguas o generar reportes de ventas desde la aplicación.</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-green-600">Funcionalidades Clave:</p>
+                            <ul class="list-disc list-inside mercado-gray space-y-2 mt-2">
+                                <li>Implementar búsqueda de órdenes con filtros de **Rango de Fechas** y **Estado**.</li>
+                                <li>Mostrar resultados paginados y ordenados (más recientes primero).</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                         <svg class="w-40 h-40 mx-auto text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 7: Pilar 2 Title -->
+            <div id="slide-7" class="slide flex-col items-center justify-center text-center p-8 bg-blue-500 text-white">
+                <div class="slide-content w-full">
+                    <h2 class="text-4xl font-bold mb-4">Pilar 2: Centro de Alertas y Disputas</h2>
+                    <p class="text-xl max-w-3xl mx-auto">Notificar al vendedor sobre eventos críticos que requieren su atención inmediata, protegiendo sus finanzas y su reputación.</p>
+                </div>
+            </div>
+
+            <!-- Slide 8: Funcionalidad 2.1 -->
+             <div id="slide-8" class="slide items-center justify-center p-12">
+                <div class="slide-content grid md:grid-cols-2 gap-12 items-center">
+                    <div class="text-center">
+                        <svg class="w-40 h-40 mx-auto text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold mercado-dark mb-4">2.1: Notificaciones en Tiempo Real</h3>
+                        <div class="mb-6">
+                            <p class="font-semibold text-red-600">Problema Actual:</p>
+                            <p class="mercado-gray">El vendedor tarda horas en descubrir **Reclamos y Contracargos**, perdiendo tiempo valioso para su defensa.</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-green-600">Funcionalidades Clave:</p>
+                            <ul class="list-disc list-inside mercado-gray space-y-2 mt-2">
+                                <li>Recibir notificaciones de `claims` y `chargebacks`.</li>
+                                <li>Generar una **alerta de alta prioridad** en la UI.</li>
+                                <li>Mostrar detalles clave: ID de orden, motivo y monto.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 9: Funcionalidad 2.2 -->
+            <div id="slide-9" class="slide items-center justify-center p-12 bg-gray-50">
+                <div class="slide-content grid md:grid-cols-2 gap-12 items-center">
+                     <div>
+                        <h3 class="text-3xl font-bold mercado-dark mb-4">2.2: Notificaciones de Reembolsos</h3>
+                        <div class="mb-6">
+                            <p class="font-semibold text-red-600">Problema Actual:</p>
+                            <p class="mercado-gray">Falta de confirmación centralizada de reembolsos, lo que dificulta la conciliación contable.</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-green-600">Funcionalidades Clave:</p>
+                            <ul class="list-disc list-inside mercado-gray space-y-2 mt-2">
+                                <li>Escuchar notificaciones de pagos con estado `reembolsado`.</li>
+                                <li>Crear un registro en un "historial de actividad financiera" para auditoría.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                         <svg class="w-40 h-40 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M7 7l9 9M20 20v-5h-5M17 17l-9-9"></path></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 10: Pilar 3 Title -->
+            <div id="slide-10" class="slide flex-col items-center justify-center text-center p-8 bg-blue-500 text-white">
+                <div class="slide-content w-full">
+                    <h2 class="text-4xl font-bold mb-4">Pilar 3: Herramientas de Gestión y Protección</h2>
+                    <p class="text-xl max-w-3xl mx-auto">Agrupar funcionalidades que resuelven problemas operativos concretos y mejoran significativamente la calidad de vida del vendedor.</p>
+                </div>
+            </div>
+
+             <!-- Slide 11: Funcionalidad 3.1 -->
+             <div id="slide-11" class="slide items-center justify-center p-12">
+                <div class="slide-content grid md:grid-cols-2 gap-12 items-center">
+                    <div class="text-center">
+                       <svg class="w-40 h-40 mx-auto text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold mercado-dark mb-4">3.1: Asistente para Lista Negra</h3>
+                        <div class="mb-6">
+                            <p class="font-semibold text-red-600">Problema Actual:</p>
+                            <p class="mercado-gray">Bloquear a un usuario desde Mercado Libre es un proceso manual y engorroso que requiere mucha navegación.</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-green-600">Funcionalidad Clave:</p>
+                            <p class="mercado-gray mt-2">Añadir un botón "Bloquear Comprador" que genera un **enlace directo (deep link)** a la página de bloqueo de Mercado Libre, con el apodo del usuario ya completado.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 12: Ampliando el Horizonte Title -->
+            <div id="slide-12" class="slide flex-col items-center justify-center text-center p-8 bg-green-500 text-white">
+                <div class="slide-content w-full">
+                    <h2 class="text-4xl font-bold mb-4">Ampliando el Horizonte de la Aplicación</h2>
+                    <p class="text-xl max-w-3xl mx-auto">Nuevas capacidades para transformar la app en un asistente de negocio indispensable.</p>
+                </div>
+            </div>
+
+            <!-- Slide 13: Inteligencia Logística (Mercado Envíos) -->
+            <div id="slide-13" class="slide items-center justify-center p-12 bg-gray-50">
+                <div class="slide-content w-full max-w-4xl">
+                    <h3 class="text-3xl font-bold mercado-dark mb-2 text-center">Inteligencia Logística</h3>
+                    <p class="text-center mercado-blue text-xl font-semibold mb-8">Convertir la app en un centro de operaciones de despacho.</p>
+                    <div class="grid md:grid-cols-3 gap-6 text-left">
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h4 class="font-bold text-lg mb-2">Consulta de Envíos</h4>
+                            <p class="mercado-gray text-sm">Permite responder al instante "¿Dónde está mi paquete?" mostrando el estado y tracking detallado del envío.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h4 class="font-bold text-lg mb-2">Generación de Etiquetas</h4>
+                            <p class="mercado-gray text-sm">Agiliza el despacho masivo permitiendo generar un único PDF con todas las etiquetas de envío pendientes.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h4 class="font-bold text-lg mb-2">Alertas de SLA</h4>
+                            <p class="mercado-gray text-sm">Crea un dashboard de "órdenes urgentes" para despachar y protege la reputación del vendedor evitando demoras.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 14: Gestión de Publicaciones e Inventario -->
+            <div id="slide-14" class="slide items-center justify-center p-12">
+                <div class="slide-content w-full max-w-4xl">
+                    <h3 class="text-3xl font-bold mercado-dark mb-2 text-center">Gestión de Publicaciones e Inventario</h3>
+                    <p class="text-center mercado-blue text-xl font-semibold mb-8">Herramientas proactivas para un catálogo saludable y rentable.</p>
+                    <div class="grid md:grid-cols-2 gap-6 text-left">
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h4 class="font-bold text-lg mb-2">Salud de Publicaciones</h4>
+                            <p class="mercado-gray text-sm">Notifica si un producto está perdiendo visibilidad por problemas de calidad, permitiendo acciones correctivas antes de que las ventas caigan.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h4 class="font-bold text-lg mb-2">Consulta de Stock y Precio</h4>
+                            <p class="mercado-gray text-sm">Ofrece un dashboard de inventario para verificar rápidamente los niveles de stock y precios actuales, incluyendo todas las variaciones (talles, colores).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 15: Información Financiera y de Facturación -->
+            <div id="slide-15" class="slide items-center justify-center p-12 bg-gray-50">
+                <div class="slide-content w-full max-w-4xl">
+                    <h3 class="text-3xl font-bold mercado-dark mb-2 text-center">Información Financiera (Solo Consulta)</h3>
+                    <p class="text-center mercado-blue text-xl font-semibold mb-8">Agilizar la administración y contabilidad del negocio.</p>
+                    <div class="grid md:grid-cols-2 gap-6 text-left">
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h4 class="font-bold text-lg mb-2">Datos Fiscales del Comprador</h4>
+                            <p class="mercado-gray text-sm">Elimina el cuello de botella de la facturación manual al obtener programáticamente el CUIT/RFC y Razón Social del comprador.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h4 class="font-bold text-lg mb-2">Análisis de Descuentos</h4>
+                            <p class="mercado-gray text-sm">Permite entender la rentabilidad real de cada venta, mostrando si los descuentos son financiados por Mercado Libre o por el vendedor.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 16: Impacto Estratégico -->
+            <div id="slide-16" class="slide flex-col items-center justify-center p-12 bg-gray-50">
+                <div class="slide-content w-full max-w-4xl text-center">
+                    <h2 class="text-3xl font-bold mercado-dark mb-10">Impacto Estratégico y Propuesta de Valor</h2>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
+                            <svg class="w-10 h-10 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                            <div><p class="text-lg font-semibold">Aumento del Valor Percibido</p></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
+                           <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                            <div><p class="text-lg font-semibold">Mejora de la Eficiencia Operativa</p></div>
+                        </div>
+                         <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
+                           <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01"></path></svg>
+                            <div><p class="text-lg font-semibold">Reducción del Riesgo Financiero</p></div>
+                        </div>
+                         <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
+                           <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                            <div><p class="text-lg font-semibold">Incremento de la Retención de Usuarios</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 17: Impacto - Valor Percibido -->
+            <div id="slide-17" class="slide items-center justify-center p-12">
+                <div class="slide-content grid md:grid-cols-2 gap-12 items-center">
+                    <div class="text-center">
+                        <svg class="w-40 h-40 mx-auto text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold mercado-dark mb-4">Impacto: Aumento del Valor Percibido</h3>
+                        <p class="text-lg mercado-blue font-semibold mb-4">¿Por qué nuestra herramienta se volverá indispensable?</p>
+                        <ul class="list-disc list-inside mercado-gray space-y-3">
+                            <li>**De "Canal de Mensajes" a "Centro de Mando":** El vendedor nos usará para buscar órdenes, entender su historial y protegerse de riesgos.</li>
+                            <li>**Resolución de "Pain Points" Reales:** El "Asistente de Lista Negra" demuestra que entendemos y resolvemos sus problemas diarios.</li>
+                             <li>**Confianza y Profesionalismo:** Una herramienta que alerta sobre reclamos y permite buscar órdenes antiguas proyecta una imagen de robustez y fiabilidad.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 18: Impacto - Eficiencia Operativa -->
+            <div id="slide-18" class="slide items-center justify-center p-12 bg-gray-50">
+                <div class="slide-content grid md:grid-cols-2 gap-12 items-center">
+                     <div>
+                        <h3 class="text-3xl font-bold mercado-dark mb-4">Impacto: Mejora de la Eficiencia Operativa</h3>
+                        <p class="text-lg mercado-blue font-semibold mb-4">Menos clics, menos tiempo, menos errores.</p>
+                        <ul class="list-disc list-inside mercado-gray space-y-3">
+                            <li>**Reducción del Cambio de Contexto:** Eliminamos la necesidad de tener abierta la pestaña de Mercado Libre para tareas clave.</li>
+                            <li>**Acceso Inmediato a la Información:** ¿Buscar una orden de la semana pasada? Se hace en segundos desde nuestra plataforma, no en el complejo panel de ML.</li>
+                            <li>**Flujos de Trabajo Simplificados:** El "Asistente de Lista Negra" convierte un proceso de 5 pasos en un solo clic.</li>
+                        </ul>
+                    </div>
+                    <div class="text-center">
+                         <svg class="w-40 h-40 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 19: Impacto - Riesgo Financiero -->
+            <div id="slide-19" class="slide items-center justify-center p-12">
+                <div class="slide-content grid md:grid-cols-2 gap-12 items-center">
+                    <div class="text-center">
+                        <svg class="w-40 h-40 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold mercado-dark mb-4">Impacto: Reducción del Riesgo Financiero</h3>
+                        <p class="text-lg mercado-blue font-semibold mb-4">Protegiendo el activo más importante del vendedor.</p>
+                         <ul class="list-disc list-inside mercado-gray space-y-3">
+                            <li>**Primera Línea de Defensa:** Notificaciones instantáneas de **reclamos y contracargos** dan tiempo máximo para preparar una defensa y evitar pérdidas.</li>
+                            <li>**Prevención de Pérdidas:** Nuestra herramienta actúa como un seguro, minimizando la posibilidad de que un evento crítico pase desapercibido.</li>
+                             <li>**Visibilidad Financiera:** Las notificaciones de reembolsos permiten una conciliación contable más rápida y precisa.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 20: Impacto - Retención de Usuarios -->
+            <div id="slide-20" class="slide items-center justify-center p-12 bg-gray-50">
+                <div class="slide-content grid md:grid-cols-2 gap-12 items-center">
+                     <div>
+                        <h3 class="text-3xl font-bold mercado-dark mb-4">Impacto: Incremento de la Retención</h3>
+                        <p class="text-lg mercado-blue font-semibold mb-4">¿Por qué un vendedor no querrá irse?</p>
+                        <ul class="list-disc list-inside mercado-gray space-y-3">
+                           <li>**Creación de Dependencia Positiva ("Stickiness"):** La aplicación se integra en el flujo de trabajo diario. Volver a operar "manualmente" será un paso atrás.</li>
+                           <li>**Propuesta de Valor Única:** Ofrecemos una experiencia más consolidada y eficiente que usar el panel de Mercado Libre por sí solo.</li>
+                           <li>**Lealtad a través de la Protección:** Un vendedor que siente que protegemos activamente su negocio desarrollará una fuerte lealtad hacia nuestra plataforma.</li>
+                        </ul>
+                    </div>
+                    <div class="text-center">
+                         <svg class="w-40 h-40 mx-auto text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 21: Próximos Pasos -->
+             <div id="slide-21" class="slide items-center justify-center p-12">
+                <div class="slide-content w-full max-w-2xl text-center">
+                    <h2 class="text-3xl font-bold mercado-dark mb-10">Próximos Pasos</h2>
+                    <ol class="text-left space-y-6">
+                        <li class="flex items-start">
+                            <span class="bg-yellow-400 text-gray-800 font-bold rounded-full w-8 h-8 flex items-center justify-center mr-4">1</span>
+                            <span class="text-xl mercado-gray">Validar y priorizar las funcionalidades con el equipo de producto.</span>
+                        </li>
+                         <li class="flex items-start">
+                            <span class="bg-yellow-400 text-gray-800 font-bold rounded-full w-8 h-8 flex items-center justify-center mr-4">2</span>
+                            <span class="text-xl mercado-gray">Desglosar cada funcionalidad en Épicas y User Stories para el backlog.</span>
+                        </li>
+                         <li class="flex items-start">
+                            <span class="bg-yellow-400 text-gray-800 font-bold rounded-full w-8 h-8 flex items-center justify-center mr-4">3</span>
+                            <span class="text-xl mercado-gray">Iniciar el diseño de las interfaces de usuario (UX/UI) correspondientes.</span>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+             <!-- Slide 22: Q&A -->
+            <div id="slide-22" class="slide flex-col items-center justify-center text-center p-8 bg-gradient-to-br from-yellow-300 to-yellow-400">
+                <div class="slide-content w-full">
+                    <h2 class="text-6xl font-extrabold mercado-dark">¿Preguntas?</h2>
+                    <p class="mt-8 text-2xl mercado-gray">¡Gracias!</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Controles de Navegación y Barra de Progreso -->
+        <div class="controls-bar p-4 border-t border-gray-200">
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full progress-bar-fill" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between items-center mt-3">
+                <div class="w-1/3">
+                    <button id="prev-btn" class="nav-button bg-white text-gray-800 font-bold py-2 px-4 rounded-full shadow-md">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                </div>
+                <div class="w-1/3 text-center">
+                    <div id="slide-counter" class="text-gray-600 font-semibold"></div>
+                </div>
+                <div class="w-1/3 flex justify-end items-center space-x-4">
+                     <button id="fullscreen-btn" class="nav-button bg-white text-gray-800 p-2 rounded-full shadow-md" title="Pantalla Completa">
+                        <svg id="fs-enter-icon" class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                        </svg>
+                        <svg id="fs-exit-icon" class="w-6 h-6 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5M15 15l5.25 5.25" />
+                        </svg>
+                    </button>
+                    <button id="next-btn" class="nav-button bg-white text-gray-800 font-bold py-2 px-4 rounded-full shadow-md">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const slideCounter = document.getElementById('slide-counter');
+            const progressBar = document.getElementById('progress-bar');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const presentationContainer = document.getElementById('presentation-container');
+            const enterIcon = document.getElementById('fs-enter-icon');
+            const exitIcon = document.getElementById('fs-exit-icon');
+            let currentSlide = 0;
+            const totalSlides = slides.length;
+
+            function showSlide(index) {
+                slides.forEach((slide, i) => {
+                    slide.classList.remove('active');
+                });
+                slides[index].classList.add('active');
+                updateControls();
+            }
+
+            function updateControls() {
+                slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+                const progressPercentage = ((currentSlide + 1) / totalSlides) * 100;
+                progressBar.style.width = `${progressPercentage}%`;
+                prevBtn.disabled = currentSlide === 0;
+                nextBtn.disabled = currentSlide === totalSlides - 1;
+                prevBtn.classList.toggle('opacity-50', currentSlide === 0);
+                nextBtn.classList.toggle('opacity-50', currentSlide === totalSlides - 1);
+            }
+
+            function updateFullscreenIcon() {
+                if (document.fullscreenElement) {
+                    enterIcon.classList.add('hidden');
+                    exitIcon.classList.remove('hidden');
+                } else {
+                    enterIcon.classList.remove('hidden');
+                    exitIcon.classList.add('hidden');
+                }
+            }
+
+            function toggleFullScreen() {
+                if (!document.fullscreenElement) {
+                    presentationContainer.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+
+            nextBtn.addEventListener('click', () => {
+                if (currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    showSlide(currentSlide);
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    showSlide(currentSlide);
+                }
+            });
+
+            fullscreenBtn.addEventListener('click', toggleFullScreen);
+            document.addEventListener('fullscreenchange', updateFullscreenIcon);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' && currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    showSlide(currentSlide);
+                } else if (e.key === 'ArrowLeft' && currentSlide > 0) {
+                    currentSlide--;
+                    showSlide(currentSlide);
+                } else if (e.key === 'f') {
+                    toggleFullScreen();
+                }
+            });
+
+            showSlide(currentSlide);
+        });
+    </script>
+</body>
+</html>

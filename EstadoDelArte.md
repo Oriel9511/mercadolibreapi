@@ -1,161 +1,272 @@
-api-channel-mercadolibre
+Informe General del Proyecto: api-channel-mercadolibre
+Propósito General
+En esencia, este software actúa como un intermediario o adaptador. Su función principal es conectar el ecosistema interno de "Chattigo" con la plataforma de Mercado Libre.
 
-Ver razonamiento
-Informe Detallado de Funcionalidades: API api-channel-mercadolibre
-Este informe presenta un análisis exhaustivo de las funcionalidades implementadas en el proyecto api-channel-mercadolibre, contrastándolas con la documentación oficial para desarrolladores de Mercado Libre. El objetivo es identificar las capacidades actuales del sistema, las áreas de mejora y las funcionalidades pendientes de implementación para mantener el producto actualizado y competitivo.
+Imagina que tienes tu sistema de gestión de clientes (como un CRM o una plataforma de chat unificado) y quieres que tus agentes puedan responder preguntas de productos o mensajes de compradores de Mercado Libre directamente desde tus herramientas, sin tener que entrar a la web de Mercado Libre. Este proyecto hace exactamente eso.
 
-1. Arquitectura Central y Autenticación
-1.1. Ecosistema de APIs de Mercado Libre
-La aplicación demuestra una comprensión de la arquitectura distribuida de Mercado Libre, interactuando con diferentes recursos que, aunque bajo el mismo dominio api.mercadolibre.com, representan distintas áreas de negocio (ítems, órdenes, preguntas, etc.).
+Recibe notificaciones de Mercado Libre (nuevas preguntas, mensajes, órdenes).
 
-Punto a mejorar: Aunque se interactúa con el Marketplace, no hay una integración explícita con las APIs de Mercado Pago más allá de la consulta de pagos implícita en una orden, ni con Mercado Shops o Mercado Envíos a un nivel profundo de gestión logística avanzada.
+Transforma esas notificaciones a un formato que el sistema de Chattigo entiende.
 
-1.2. Proceso de Creación y Configuración de Aplicaciones
-La configuración de la aplicación se gestiona a través de variables de entorno cargadas desde un Spring Cloud Config Server, como se evidencia en config/configImpl.go. Esto permite una gestión centralizada de credenciales como client_id y client_secret.
+Recibe instrucciones desde Chattigo (ej. "responder a esta pregunta").
 
-Implementación Actual:
+Transforma esas instrucciones y las envía a la API de Mercado Libre para ejecutar la acción.
 
-URIs de redirect: Se utiliza una redirect_uri para el flujo de autenticación, configurable a través de webhook.redirect-url.
+Funcionalidades Principales
+He identificado cuatro funcionalidades clave en esta implementación. Vamos a desglosar cada una, señalando dónde vive la lógica principal.
 
-Scopes (Permisos): La aplicación solicita los permisos necesarios durante el flujo OAuth 2.0. El offline_access es fundamental para el funcionamiento del backend, permitiendo la renovación de tokens sin intervención del usuario.
+1. Gestión de Notificaciones Entrantes (Inbound)
+Esta es la funcionalidad que permite a la aplicación reaccionar a eventos que ocurren en Mercado Libre.
 
-Tópicos de Notificaciones: La aplicación está diseñada para recibir notificaciones (webhooks) en el endpoint /inbound, procesando tópicos como questions, orders_v2, y messages.
+Objetivo
+El objetivo es capturar eventos en tiempo real, como una nueva pregunta en una publicación o un nuevo mensaje de un comprador, y procesarlos para que el sistema interno de Chattigo se entere.
 
-Funcionalidades no implementadas:
+Implementación y Flujo de Trabajo
+El flujo de entrada tiene dos puntos de partida: un webhook HTTP y un consumidor de mensajes de Kafka.
 
-Actualmente, no se observa una interfaz o mecanismo que permita al usuario final gestionar dinámicamente los tópicos de notificaciones a los que la aplicación está suscrita.
+Recepción de la Notificación: Mercado Libre envía una pequeña notificación (un "ping") a un endpoint de nuestra API.
 
-1.3. Flujo de Autenticación OAuth 2.0
-El flujo de autenticación y la gestión de tokens son un pilar fundamental de esta API, implementados en el paquete service y client.
+Archivo Principal: main.go
 
-Implementación Actual:
+Código Clave:
 
-Autorización del Usuario y Obtención de Código: Los endpoints GET /token-mercado-libre/{code} y GET /refresh-token-mercado-libre/{refreshToken} en main.go gestionan la obtención inicial y la renovación de tokens.
+Go
 
-Intercambio de Código por Tokens: El TokenClientImpl en pkg/client/tokenClientImpl.go implementa la lógica para intercambiar el código de autorización por un access_token y un refresh_token.
+// main.go
+r.Post("/inbound", container.InboundService.NotificationProcessor)
+Explicación: Esta línea registra una ruta HTTP. Cuando Mercado Libre hace un POST a /inbound, se ejecuta la función NotificationProcessor del servicio InboundService.
 
-Uso y Renovación del Access Token: El TokenServiceImpl gestiona la obtención y el refresco de tokens, utilizando Redis para cachear los access_token y reducir la latencia en las llamadas a la API de Mercado Libre.
+Validación y Encolamiento: La función NotificationProcessor no procesa el evento directamente. Para no hacer esperar a Mercado Libre y para asegurar que no se pierdan notificaciones, esta valida la notificación y la pone en una cola de mensajes (Kafka) para un procesamiento posterior y asíncrono.
 
-Buenas Prácticas y Mejoras:
+Archivo Principal: pkg/service/inboundServiceImpl.go y pkg/client/notificationClientImpl.go
 
-El uso de Redis para cachear los tokens (mercado-libre-token-{clientId}-{userId}) es una excelente práctica que optimiza el rendimiento y evita llamadas innecesarias a la API de autenticación.
+Código Clave (notificationClientImpl.go):
 
-El sistema maneja la expiración de tokens de manera reactiva, intentando una renovación cuando una llamada a la API falla con un estado 401 Unauthorized.
+Go
 
-2. Gestión de Entidades: Usuarios y Aplicaciones
-2.1. Consulta de Datos de Usuario
-Implementación Actual:
+// pkg/client/notificationClientImpl.go
+func (o *NotificationClientImpl) EnqueueNotification(ctx context.Context, notification dto.MercadoLibreNotification) rxgo.Observable {
+    // ...
+    key := fmt.Sprintf("%v_%v", notification.Topic, notification.Resource)
+    notification.CtxId = ctxString
+    go o.kafkaProducerService.PublicKafkaKey(ctxString, o.topicEnqueueNotification, key, notification) // Enviar a Kafka
+    return rxgo.Empty()
+}
+Explicación: Se publica la notificación en un "topic" de Kafka. La palabra clave go inicia una goroutine, que es la forma en que Go maneja la concurrencia. Es como un hilo de ejecución muy ligero. Piensa en ello como un Task.Run en C# o simplemente un await en una función asíncrona en TS, pero sin bloquear el hilo principal.
 
-Datos Públicos de un Usuario: El cliente mercadoLibreClientImpl.go implementa la función GetUserInfoPublic que consume el endpoint GET /users/{User_id} para obtener información pública del comprador, como su nickname.
+Procesamiento Asíncrono: Un "consumidor" de Kafka está escuchando constantemente ese "topic". Cuando llega la notificación, la procesa.
 
-Funcionalidades no implementadas:
+Archivo Principal: handler/inboundSubscriptionImpl.go
 
-No se evidencia el uso del endpoint GET /users/me para obtener los datos del vendedor autenticado.
+Código Clave:
 
-No se está consultando ni almacenando información privada del usuario, como nombre completo o datos de contacto, más allá de lo que se obtiene en el contexto de una orden.
+Go
 
-2.2. Mecanismos de Bloqueo de Usuarios
-Funcionalidades no implementadas:
+// handler/inboundSubscriptionImpl.go
+func (svc *InboundSubscriptionImpl) ReadTopicInbound(ctx context.Context, message configuration.Message) {
+    // ...
+    messageChannel := dto.MercadoLibreNotification{}
+    if err := json.Unmarshal(message.Value(), &messageChannel); err != nil {
+        // ...
+        return
+    }
+    // ...
+    // Usa Redis para evitar procesar la misma notificación dos veces
+    idMessageCanal, _ := svc.redisService.GetValue(context.Background(), messageChannel.Resource)
 
-El proyecto no implementa ninguna funcionalidad para gestionar la lista negra de usuarios, ni para preguntas ni para compras. Esta es una característica importante para los vendedores que no está siendo aprovechada.
+    if len(idMessageCanal) < 1 {
+        _ = svc.redisService.SetValueExpire(context.Background(), messageChannel.Resource, "1", time.Second*svc.notificationTTL)
+        // Llama al servicio principal para manejar la lógica de negocio
+        <-svc.inboundService.NotificationHandler(ctxWithdId, messageChannel).ForEach(/*...*/)
+    }
+    // ...
+}
+Explicación:
 
-3. El Ciclo de Vida de la Publicación (Items)
-3.1. Creación y Publicación de Items
-Funcionalidades no implementadas:
+Esta función actúa como el "handler" del mensaje de Kafka.
 
-La API actualmente no cuenta con funcionalidades para crear o publicar nuevos ítems en Mercado Libre (POST /items). Su enfoque es la gestión de la comunicación y las órdenes de ítems ya existentes.
+Primero, decodifica el mensaje (json.Unmarshal).
 
-3.2. Búsqueda y Recuperación de Datos de Items
-Implementación Actual:
+Buena Práctica: Utiliza Redis como un mecanismo de deduplicación o idempotencia. Antes de procesar, verifica si el ID del recurso (messageChannel.Resource) ya existe en Redis. Si no existe, lo guarda con un tiempo de expiración (TTL) y procede. Esto evita que una notificación duplicada genere acciones duplicadas.
 
-Recuperación de un Ítem: mercadoLibreClientImpl.go implementa GetResourceItem (GET /items/{itemId}) para obtener la información de un producto específico.
+Finalmente, invoca inboundService.NotificationHandler, donde reside la lógica de negocio real (obtener detalles de la pregunta/mensaje, transformarlo y enviarlo al sistema interno).
 
-Recuperación Múltiple (Multiget): Se utiliza GetResourceItems (GET /items?ids=...) para obtener información de múltiples productos en una sola llamada, lo cual es una práctica eficiente.
+2. Procesamiento de Mensajes Salientes (Outbound)
+Esta es la funcionalidad que permite a los agentes de Chattigo enviar respuestas a Mercado Libre.
 
-Funcionalidades no implementadas:
+Objetivo
+Tomar un mensaje generado en la plataforma de Chattigo, determinar si es una respuesta a una pregunta o un mensaje a un comprador, y enviarlo a la API correcta de Mercado Libre.
 
-No se utilizan los endpoints de búsqueda de ítems por vendedor (GET /users/$USER_ID/items/search), ni se aprovechan los filtros avanzados como la "salud" de la publicación o la búsqueda por SKU.
+Implementación y Flujo de Trabajo
+Recepción del Mensaje desde Chattigo: La aplicación escucha un "topic" de Kafka diferente para los mensajes salientes.
 
-3.3. Modificación y Sincronización de Publicaciones
-Funcionalidades no implementadas:
+Archivo Principal: main.go
 
-No existen funcionalidades para modificar ítems (PUT /items/$ITEM_ID), como actualizar el precio, el stock o el título. La gestión del inventario no forma parte del alcance actual de la aplicación.
+Código Clave:
 
-3.4. Gestión Avanzada: Atributos, Variaciones y Catálogo
-Funcionalidades no implementadas:
+Go
 
-La API no gestiona variaciones de productos, ni interactúa con el catálogo de Mercado Libre para competir por la "buy box". Tampoco hay soporte para guías de talles.
+// main.go
+go consumerOutbound.SyncSubscribe(
+    viper.GetString("listen.outbound.topic"),
+    group,
+    100,
+    container.OutboundSubscription.ReadTopicOutbound,
+)
+Explicación: Al igual que en el flujo de entrada, se inicia una goroutine que suscribe la función ReadTopicOutbound al topic de Kafka de salida.
 
-4. Gestión de Transacciones: Órdenes y Ventas
-4.1. Recuperación y Búsqueda de Órdenes
-Implementación Actual:
+Manejo del Mensaje: La función ReadTopicOutbound decodifica el mensaje y lo pasa al servicio de negocio.
 
-Obtener una Orden Individual: El sistema procesa notificaciones del tópico orders_v2 y utiliza GetResourceOrders (GET /orders/$ORDER_ID) para obtener los detalles completos de la transacción.
+Archivo Principal: handler/outboundSubscriptionImpl.go
 
-Manejo de Órdenes de Carrito (Packs): La aplicación es capaz de manejar el concepto de pack_id, consultando el endpoint /packs/{pack_id} para obtener las órdenes individuales que componen el carrito.
+Código Clave:
 
-Funcionalidades no implementadas:
+Go
 
-No se proporciona una interfaz o endpoint para que el usuario pueda buscar órdenes (GET /orders/search) aplicando filtros. La obtención de órdenes es puramente reactiva a las notificaciones.
+// handler/outboundSubscriptionImpl.go
+func (svc OutboundSupscritpionImpl) ReadTopicOutbound(ctx context.Context, message configuration.Message) {
+    // ...
+    messageChannel := dto.MessageChannel{}
+    if err := json.Unmarshal(message.Value(), &messageChannel); err != nil {
+        // ...
+        return
+    }
+    // Llama al servicio que contiene la lógica principal
+    <-svc.outboundService.ProcessOutboundEvent(context.Background(), messageChannel).ForEach(/*...*/)
+    // ...
+}
+Lógica de Negocio y Envío a Mercado Libre:
 
-4.2. Acceso a Datos de Facturación y Descuentos Aplicados
-Funcionalidades no implementadas:
+Archivo Principal: pkg/service/outboundServiceImpl.go
 
-La API no consume los endpoints /orders/billing-info/{site_id}/{billing_info_id} para obtener los datos fiscales del comprador, ni /orders/$ORDER_ID/discounts para analizar los descuentos aplicados. Esta información, crucial para la facturación, no se está recuperando.
+Código Clave:
 
-5. Logística y Envíos (Mercado Envíos)
-La gestión de envíos es un área con una implementación muy limitada en el proyecto actual.
+Go
 
-Funcionalidades no implementadas:
+// pkg/service/outboundServiceImpl.go
+func (o *OutboundServiceImpl) SendMessageToMercadoLibre(ctx context.Context, message dto.MessageChannel, token string) rxgo.Observable {
+    // ...
+    channelType := message.Channel
+    if channelType == "MERCADOMURO" { // Es una respuesta a una pregunta
+        // ... Lógica para buscar el ID de la pregunta ...
+        return o.mercadoLibreClient.AnswerQuestion(ctx, token, question.Id, message.Content).FlatMap(/*...*/)
+    } else if channelType == "MERCADOVENTA" { // Es un mensaje a un comprador
+        // ... Lógica para construir el mensaje post-venta ...
+        return o.mercadoLibreClient.SendMessageToBuyer(ctx, token, packId, messageToBuyer).FlatMap(/*...*/)
+    }
+    return rxgo.Empty()
+}
+Explicación:
 
-Consulta de Envíos: No se realizan llamadas al endpoint /shipments/$SHIPMENT_ID para obtener el estado detallado del envío.
+Aquí está el núcleo de la lógica de salida. Primero, se obtiene un token de autenticación (ver siguiente sección).
 
-Generación de Etiquetas: No hay funcionalidad para generar o imprimir etiquetas de envío.
+Luego, se determina el tipo de mensaje basado en message.Channel.
 
-Gestión de SLA: No se consume el endpoint /shipments/$SHIPMENT_ID/sla, por lo que la aplicación no puede informar al vendedor sobre los plazos de despacho, una métrica crítica para la reputación.
+Si es MERCADOMURO, se entiende que es una respuesta a una pregunta pública. El código busca el ID de la última pregunta sin responder para ese usuario y producto y luego llama a mercadoLibreClient.AnswerQuestion.
 
-Modelos Logísticos Avanzados: No hay soporte para la gestión de inventario en Fulfillment ni para las particularidades de otros modelos como Flex o Colecta.
+Si es MERCADOVENTA, es un mensaje privado post-venta. El código prepara el payload y llama a mercadoLibreClient.SendMessageToBuyer.
 
-6. Comunicaciones y Engagement
-Esta es el área funcional más desarrollada y robusta del proyecto.
+Analogía con TS/C#: El uso de rxgo con .FlatMap es muy similar a flatMap o mergeMap en RxJS, o a SelectMany en LINQ con Tasks. Se usa para encadenar operaciones asíncronas: "obtén el token, y luego con ese token, envía el mensaje".
 
-6.1. Gestión de Preguntas y Respuestas (Pre-Venta)
-Implementación Actual:
+3. Autenticación y Gestión de Tokens con Mercado Libre (OAuth2)
+Mercado Libre, como muchas otras APIs modernas, utiliza OAuth2 para la autenticación. Esta aplicación maneja ese flujo.
 
-Recepción de Preguntas: La aplicación procesa notificaciones del tópico questions y utiliza GetResourceQuestion para obtener el contenido de la pregunta.
+Objetivo
+Obtener y refrescar de forma segura los access_token necesarios para realizar llamadas a la API de Mercado Libre en nombre de un vendedor.
 
-Respuesta a Preguntas: El OutboundServiceImpl implementa la lógica para responder preguntas a través de POST /answers.
+Implementación y Flujo de Trabajo
+Endpoints de Autorización: Se exponen endpoints para que un usuario pueda iniciar el flujo de OAuth2 y para refrescar tokens.
 
-Identificación de la Última Pregunta: Se utiliza GetLastUnansweredQuestionByProductAndUser para identificar la pregunta a responder cuando un agente envía un mensaje en el contexto de un "muro".
+Archivo Principal: main.go
 
-6.2. Mensajería Post-Venta
-Implementación Actual:
+Código Clave:
 
-Recepción de Mensajes: Se procesan notificaciones del tópico messages y se obtienen los detalles de la conversación.
+Go
 
-Envío de Mensajes: Se implementa el envío de mensajes al comprador a través del endpoint POST /messages/packs/$PACK_ID/sellers/$USER_ID.
+// main.go
+r.Get("/token-mercado-libre/{code}", container.TokenService.GetMercadoLibreToken)
+r.Get("/refresh-token-mercado-libre/{refreshToken}", container.TokenService.GetMercadoLibreRefreshToken)
+Lógica de Cliente OAuth2: El tokenClient se encarga de construir y realizar las peticiones HTTP al endpoint de autenticación de Mercado Libre.
 
-Gestión de Archivos Adjuntos: La aplicación soporta el envío de archivos adjuntos. Realiza el proceso de dos pasos: primero sube el archivo a Mercado Libre para obtener un attachment_id y luego envía el mensaje con dicho ID.
+Archivo Principal: pkg/client/tokenClientImpl.go
 
-7. Conclusiones y Recomendaciones Estratégicas
-La API api-channel-mercadolibre actualmente se especializa en ser un canal de comunicación unificado, gestionando de manera muy competente las interacciones de pre-venta (preguntas) y post-venta (mensajería). Su arquitectura basada en eventos (webhooks) y el uso de caché para los tokens son puntos fuertes que aseguran un buen rendimiento.
+Código Clave:
 
-Sin embargo, para evolucionar hacia una herramienta de gestión integral de ventas, hay un campo muy amplio de funcionalidades de la API de Mercado Libre que no se están explotando.
+Go
 
-Recomendaciones de Alto Impacto:
+// pkg/client/tokenClientImpl.go
+func (t *TokenClientImpl) AuthMercadoLibre(ctx context.Context, code string) rxgo.Observable {
+    // ...
+    urlReq := fmt.Sprintf("%s/%s", t.meliUrl, "oauth/token")
+    // ...
+    authURL := dto.NewAuthorizationURL(urlReq)
+    authURL.AddGrantType("authorization_code")
+    authURL.AddClientId(t.clientId)
+    authURL.AddClientSecret(t.clientSecret)
+    authURL.AddCode(code)
+    authURL.AddRedirectURI(t.redirectUrl)
 
-Implementar Gestión de Envíos: La adición de funcionalidades para consultar el estado de los envíos, imprimir etiquetas y, fundamentalmente, monitorear el SLA de despacho, aportaría un valor inmenso a los vendedores, ayudándoles a mejorar su reputación.
+    // ... realiza la petición POST a Mercado Libre ...
+    return t.webClient.HTTPDoReqHeader(ctxString, authURL.String(), nil, header, http.POST, &authResponse).FlatMap(/*...*/)
+}
+Explicación: Esta función implementa una parte del flujo estándar de OAuth2. Recibe un code temporal, y lo intercambia por un access_token y un refresh_token haciendo una petición POST al servidor de Mercado Libre con las credenciales de la aplicación.
 
-Integrar la Gestión de Publicaciones: Permitir la sincronización de stock y precio desde una fuente externa sería el siguiente paso lógico para convertirse en una herramienta de gestión de inventario.
+Abstracción y Caching de Tokens: El tokenService actúa como una capa de abstracción que utiliza Redis para cachear los tokens.
 
-Enriquecer la Información de la Orden: Consumir los endpoints de datos de facturación y desglose de descuentos proporcionaría al vendedor la información completa para sus procesos contables y administrativos.
+Archivo Principal: pkg/service/tokenServiceImpl.go
 
-Añadir Gestión de la Reputación y Salud de Publicaciones: Proveer un panel donde el vendedor pueda ver su reputación y el estado de "salud" de sus publicaciones le permitiría tomar acciones correctivas de manera proactiva.
+Código Clave:
 
-Recomendaciones de Mediano Impacto:
+Go
 
-Implementar Bloqueo de Usuarios: Ofrecer la posibilidad de bloquear compradores molestos es una funcionalidad muy solicitada por los vendedores.
+// pkg/service/tokenServiceImpl.go
+func (o TokenServiceImpl) GetToken(ctx context.Context, did string, refresh bool) rxgo.Observable {
+    // ...
+    redisKeyDid := fmt.Sprintf("mercado-libre-token-%v-%v", o.clientId, did)
+    if refresh {
+        return o.tokenClient.GetToken(ctx, did) // Forzar refresco
+    }
+    redisToken, err := o.redisService.GetValue(context.Background(), redisKeyDid)
+    if redisToken == "" || err != nil {
+        // Si no está en caché, lo busca y lo refresca
+        return o.tokenClient.GetToken(context.Background(), did)
+    }
+    // Si está en caché, lo devuelve
+    return rxgo.Just(redisToken)()
+}
+Explicación y Buenas Prácticas: Este es un patrón de diseño clásico de cache-aside. Cuando se necesita un token:
 
-Avanzar hacia la Gestión de Catálogo y Variaciones: Para vendedores con un catálogo de productos complejo, la gestión de variaciones y la capacidad de competir en el Catálogo de Mercado Libre son funcionalidades clave.
+Intenta leerlo de Redis (caché).
 
-En resumen, la base del proyecto es sólida y está bien enfocada en la comunicación. El siguiente horizonte de desarrollo debería centrarse en expandir las capacidades hacia la gestión logística y de publicaciones, que son los otros dos pilares de la operación de un vendedor en Mercado Libre.
+Si existe, lo devuelve (muy rápido).
+
+Si no existe (cache miss) o si se fuerza un refresco (refresh = true), llama al tokenClient para que obtenga uno nuevo de Mercado Libre, lo guarde en la base de datos de configuración y en la caché de Redis para futuras peticiones, y luego lo devuelva. Esto optimiza el rendimiento y reduce la dependencia constante del servicio de autenticación.
+
+4. Arquitectura y Componentes Clave
+Inyección de Dependencias con Google Wire: El proyecto no instancia sus componentes manualmente (ej. myService := NewService()). En su lugar, usa wire para construir el grafo de dependencias.
+
+Archivo Principal: wire.go
+
+Explicación: En este archivo declaras qué componentes existen y cómo se construyen (ej. service.NewInboundServiceImpl). Al ejecutar make wire (o wire wire.go), Wire genera el código en wire_gen.go que crea e inyecta todas las dependencias necesarias.
+
+Analogía: Esto es muy similar al contenedor de Inyección de Dependencias en .NET Core (services.AddTransient<IMyService, MyService>() en Startup.cs) o a frameworks como NestJS en el mundo de TypeScript.
+
+Configuración centralizada con Viper y Spring Cloud Config: La configuración no está en archivos locales, sino que se obtiene de un servidor centralizado al arrancar.
+
+Archivo Principal: config/configImpl.go
+
+Explicación: La función LoadConfiguration hace una petición HTTP a un servidor de configuración (patrón común en microservicios, popularizado por Spring Cloud en Java). La respuesta JSON se parsea y se carga en viper, una librería muy popular en Go para manejar configuración.
+
+Analogía: Piensa en viper como el sistema IConfiguration de .NET que puede leer de appsettings.json, variables de entorno, Azure App Configuration, etc. Aquí, una de sus "fuentes" es una llamada HTTP.
+
+Contenerización con Docker: El Dockerfile muestra un patrón excelente.
+
+Archivo Principal: Dockerfile
+
+Explicación y Buenas Prácticas: Utiliza una compilación multi-etapa.
+
+La primera etapa (AS builder) usa una imagen completa de Go para compilar el código fuente en un único binario ejecutable.
+
+La segunda etapa (FROM alpine:3.16.0) usa una imagen base mínima (Alpine Linux), y solo copia el binario compilado de la primera etapa.
+
+Resultado: La imagen final es extremadamente pequeña y segura, ya que no contiene el código fuente, el compilador de Go ni herramientas innecesarias. Esto es una práctica estándar y muy recomendada en Go.

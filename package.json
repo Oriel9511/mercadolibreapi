@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://chattigo.github.io/MercadoLibre",
+  "homepage": "https://oriel9511.github.io/mercadolibreapi",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

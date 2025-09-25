@@ -27,9 +27,9 @@ const Pillar2Func2 = () => {
             color: '#333333',
             marginBottom: '30px'
           }}>
-            2.2: Notificaciones de Reembolsos
+            Notificaciones de Reembolsos
           </h3>
-          
+
           <div style={{ marginBottom: '25px' }}>
             <p style={{
               fontSize: '20px',
@@ -47,7 +47,7 @@ const Pillar2Func2 = () => {
               Falta de confirmación centralizada de reembolsos, lo que dificulta la conciliación contable.
             </p>
           </div>
-          
+
           <div>
             <p style={{
               fontSize: '20px',
@@ -69,7 +69,7 @@ const Pillar2Func2 = () => {
             </ul>
           </div>
         </div>
-        
+
         {/* Columna del Icono */}
         <div style={{
           background: '#FFFFFF',

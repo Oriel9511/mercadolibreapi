@@ -43,36 +43,34 @@ const ValuePropositionSlide = () => {
             color: '#333333',
             marginBottom: '30px'
           }}>
-            Impacto: Aumento del Valor Percibido
+            Impacto Final: Para Nuestros Clientes
           </h3>
           
-          <p style={{
-            fontSize: '22px',
-            color: '#3483FA',
-            fontWeight: 'bold',
-            marginBottom: '20px'
-          }}>
-            ¿Por qué nuestra herramienta se volverá indispensable?
-          </p>
-          
           <ul style={{
-            listStyleType: 'disc',
-            paddingLeft: '25px',
-            fontSize: '18px',
+            listStyleType: 'none',
+            paddingLeft: 0,
+            fontSize: '20px',
             color: '#555555',
             lineHeight: '1.8',
             display: 'flex',
             flexDirection: 'column',
-            gap: '15px'
+            gap: '20px'
           }}>
-            <li>
-              <strong>De "Canal de Mensajes" a "Centro de Mando":</strong> El vendedor nos usará para buscar órdenes, entender su historial y protegerse de riesgos.
+            <li style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ fontSize: '24px', marginRight: '15px' }}>📈</span>
+              <div><strong>Más Ventas:</strong> A través de respuestas más rápidas y efectivas en la preventa.</div>
             </li>
-            <li>
-              <strong>Resolución de "Pain Points" Reales:</strong> El "Asistente de Lista Negra" demuestra que entendemos y resolvemos sus problemas diarios.
+            <li style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ fontSize: '24px', marginRight: '15px' }}>🏆</span>
+              <div><strong>Mejor Reputación:</strong> Impulsada por una comunicación postventa impecable y proactiva.</div>
             </li>
-            <li>
-              <strong>Confianza y Profesionalismo:</strong> Una herramienta que alerta sobre reclamos y permite buscar órdenes antiguas proyecta una imagen de robustez y fiabilidad.
+            <li style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ fontSize: '24px', marginRight: '15px' }}>⏳</span>
+              <div><strong>Más Tiempo:</strong> Liberado gracias a la automatización de tareas repetitivas y operativas.</div>
+            </li>
+            <li style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ fontSize: '24px', marginRight: '15px' }}>🛡️</span>
+              <div><strong>Menos Riesgo:</strong> Al gestionar reclamos de manera profesional y centralizada.</div>
             </li>
           </ul>
         </div>

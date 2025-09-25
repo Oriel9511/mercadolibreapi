@@ -34,7 +34,7 @@ const Pillar1Func1 = () => {
             color: '#3483FA'
           }} />
         </div>
-        
+
         {/* Columna de Contenido */}
         <div>
           <h3 style={{
@@ -43,9 +43,9 @@ const Pillar1Func1 = () => {
             color: '#333333',
             marginBottom: '30px'
           }}>
-            1.1: Contexto del Vendedor
+              Contexto del Vendedor
           </h3>
-          
+
           <div style={{ marginBottom: '25px' }}>
             <p style={{
               fontSize: '20px',
@@ -63,7 +63,7 @@ const Pillar1Func1 = () => {
               La aplicación no conoce la identidad completa del usuario, impidiendo consultas proactivas.
             </p>
           </div>
-          
+
           <div>
             <p style={{
               fontSize: '20px',

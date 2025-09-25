@@ -34,7 +34,7 @@ const Pillar3Func1 = () => {
             color: '#E63946'
           }} />
         </div>
-        
+
         {/* Columna de Contenido */}
         <div>
           <h3 style={{
@@ -43,9 +43,9 @@ const Pillar3Func1 = () => {
             color: '#333333',
             marginBottom: '30px'
           }}>
-            3.1: Asistente para Lista Negra
+            Asistente para Lista Negra
           </h3>
-          
+
           <div style={{ marginBottom: '25px' }}>
             <p style={{
               fontSize: '20px',
@@ -63,7 +63,7 @@ const Pillar3Func1 = () => {
               Bloquear a un usuario desde Mercado Libre es un proceso manual y engorroso que requiere mucha navegación.
             </p>
           </div>
-          
+
           <div>
             <p style={{
               fontSize: '20px',

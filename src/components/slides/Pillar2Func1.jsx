@@ -34,7 +34,7 @@ const Pillar2Func1 = () => {
             color: '#E63946'
           }} />
         </div>
-        
+
         {/* Columna de Contenido */}
         <div>
           <h3 style={{
@@ -43,9 +43,9 @@ const Pillar2Func1 = () => {
             color: '#333333',
             marginBottom: '30px'
           }}>
-            2.1: Notificaciones en Tiempo Real
+            Notificaciones en Tiempo Real
           </h3>
-          
+
           <div style={{ marginBottom: '25px' }}>
             <p style={{
               fontSize: '20px',
@@ -63,7 +63,7 @@ const Pillar2Func1 = () => {
               El vendedor tarda horas en descubrir <strong>Reclamos y Contracargos</strong>, perdiendo tiempo valioso para su defensa.
             </p>
           </div>
-          
+
           <div>
             <p style={{
               fontSize: '20px',

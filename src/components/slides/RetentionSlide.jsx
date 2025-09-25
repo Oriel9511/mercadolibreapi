@@ -27,36 +27,30 @@ const RetentionSlide = () => {
             color: '#333333',
             marginBottom: '30px'
           }}>
-            Impacto: Incremento de la Retención
+            Impacto Final: Para Chattigo
           </h3>
           
-          <p style={{
-            fontSize: '22px',
-            color: '#3483FA',
-            fontWeight: 'bold',
-            marginBottom: '20px'
-          }}>
-            ¿Por qué un vendedor no querrá irse?
-          </p>
-          
           <ul style={{
-            listStyleType: 'disc',
-            paddingLeft: '25px',
-            fontSize: '18px',
+            listStyleType: 'none',
+            paddingLeft: 0,
+            fontSize: '20px',
             color: '#555555',
             lineHeight: '1.8',
             display: 'flex',
             flexDirection: 'column',
-            gap: '15px'
+            gap: '20px'
           }}>
-            <li>
-              <strong>Creación de Dependencia Positiva ("Stickiness"):</strong> La aplicación se integra en el flujo de trabajo diario. Volver a operar "manualmente" será un paso atrás.
+            <li style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ fontSize: '24px', marginRight: '15px' }}>🔄</span>
+              <div><strong>Mayor Retención de Clientes:</strong> Al volvernos indispensables en su flujo de trabajo diario.</div>
             </li>
-            <li>
-              <strong>Propuesta de Valor Única:</strong> Ofrecemos una experiencia más consolidada y eficiente que usar el panel de Mercado Libre por sí solo.
+            <li style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ fontSize: '24px', marginRight: '15px' }}>💰</span>
+              <div><strong>Justificación para Precios Premium:</strong> Por el alto valor estratégico y operativo que ofrecemos.</div>
             </li>
-            <li>
-              <strong>Lealtad a través de la Protección:</strong> Un vendedor que siente que protegemos activamente su negocio desarrollará una fuerte lealtad hacia nuestra plataforma.
+            <li style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ fontSize: '24px', marginRight: '15px' }}>⭐</span>
+              <div><strong>Ventaja Competitiva Única:</strong> Nos posicionamos por encima de herramientas generalistas y especializadas.</div>
             </li>
           </ul>
         </div>

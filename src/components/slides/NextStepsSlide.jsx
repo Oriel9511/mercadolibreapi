@@ -13,113 +13,109 @@ const NextStepsSlide = () => {
       padding: '60px',
       textAlign: 'center'
     }}>
-      <div style={{ maxWidth: '900px' }}>
+      <div style={{ maxWidth: '1100px' }}>
         <h2 style={{
           fontSize: '52px',
           fontWeight: 'bold',
           color: '#333333',
           marginBottom: '60px'
         }}>
-          Próximos Pasos
+          La Hoja de Ruta Estratégica
         </h2>
         
-        <ol style={{
-          listStyle: 'none',
-          padding: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '30px'
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '40px',
+          textAlign: 'left'
         }}>
-          <li style={{
+          {/* Fase 1 */}
+          <div style={{
             background: '#FFFFFF',
             borderRadius: '15px',
             padding: '30px',
-            display: 'flex',
-            alignItems: 'center',
-            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)',
-            textAlign: 'left'
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)'
           }}>
-            <span style={{
-              background: '#FFF159',
-              color: '#333333',
-              fontWeight: 'bold',
-              borderRadius: '50%',
-              width: '50px',
-              height: '50px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginRight: '30px',
-              fontSize: '24px',
-              flexShrink: 0
-            }}>
-              1
-            </span>
-            <span style={{ fontSize: '22px', color: '#555555', lineHeight: '1.5' }}>
-              Validar y priorizar las funcionalidades con el equipo de producto.
-            </span>
-          </li>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+              <span style={{
+                background: '#FFF159',
+                color: '#333333',
+                fontWeight: 'bold',
+                borderRadius: '10px',
+                padding: '5px 15px',
+                fontSize: '16px',
+                marginRight: '15px'
+              }}>
+                FASE 1
+              </span>
+              <h3 style={{ fontSize: '22px', fontWeight: 'bold', color: '#333' }}>Valor Inmediato</h3>
+            </div>
+            <p style={{ fontSize: '18px', color: '#555555', lineHeight: '1.6', marginBottom: '15px' }}>
+              Nos enfocamos en las "victorias rápidas" que resuelven los problemas más comunes.
+            </p>
+            <p style={{ fontSize: '18px', color: '#00A650', fontWeight: 'bold' }}>
+              Objetivo: ROI inmediato en tiempo ahorrado.
+            </p>
+          </div>
           
-          <li style={{
+          {/* Fase 2 */}
+          <div style={{
             background: '#FFFFFF',
             borderRadius: '15px',
             padding: '30px',
-            display: 'flex',
-            alignItems: 'center',
-            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)',
-            textAlign: 'left'
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)'
           }}>
-            <span style={{
-              background: '#FFF159',
-              color: '#333333',
-              fontWeight: 'bold',
-              borderRadius: '50%',
-              width: '50px',
-              height: '50px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginRight: '30px',
-              fontSize: '24px',
-              flexShrink: 0
-            }}>
-              2
-            </span>
-            <span style={{ fontSize: '22px', color: '#555555', lineHeight: '1.5' }}>
-              Desglosar cada funcionalidad en Épicas y User Stories para el backlog.
-            </span>
-          </li>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+              <span style={{
+                background: '#E1F0FF',
+                color: '#2968C8',
+                fontWeight: 'bold',
+                borderRadius: '10px',
+                padding: '5px 15px',
+                fontSize: '16px',
+                marginRight: '15px'
+              }}>
+                FASE 2
+              </span>
+              <h3 style={{ fontSize: '22px', fontWeight: 'bold', color: '#333' }}>Diferenciación Clave</h3>
+            </div>
+            <p style={{ fontSize: '18px', color: '#555555', lineHeight: '1.6', marginBottom: '15px' }}>
+              Integramos Chattigo en los flujos de trabajo críticos (etiquetas, reclamos).
+            </p>
+            <p style={{ fontSize: '18px', color: '#00A650', fontWeight: 'bold' }}>
+              Objetivo: Convertirnos en una herramienta indispensable.
+            </p>
+          </div>
           
-          <li style={{
+          {/* Fase 3 */}
+          <div style={{
             background: '#FFFFFF',
             borderRadius: '15px',
             padding: '30px',
-            display: 'flex',
-            alignItems: 'center',
-            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)',
-            textAlign: 'left'
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)'
           }}>
-            <span style={{
-              background: '#FFF159',
-              color: '#333333',
-              fontWeight: 'bold',
-              borderRadius: '50%',
-              width: '50px',
-              height: '50px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginRight: '30px',
-              fontSize: '24px',
-              flexShrink: 0
-            }}>
-              3
-            </span>
-            <span style={{ fontSize: '22px', color: '#555555', lineHeight: '1.5' }}>
-              Iniciar el diseño de las interfaces de usuario (UX/UI) correspondientes.
-            </span>
-          </li>
-        </ol>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+              <span style={{
+                background: '#E8F5E8',
+                color: '#00A650',
+                fontWeight: 'bold',
+                borderRadius: '10px',
+                padding: '5px 15px',
+                fontSize: '16px',
+                marginRight: '15px'
+              }}>
+                FASE 3
+              </span>
+              <h3 style={{ fontSize: '22px', fontWeight: 'bold', color: '#333' }}>Liderazgo de Mercado</h3>
+            </div>
+            <p style={{ fontSize: '18px', color: '#555555', lineHeight: '1.6', marginBottom: '15px' }}>
+              Introducimos análisis avanzados e IA para optimizar el negocio del vendedor.
+            </p>
+            <p style={{ fontSize: '18px', color: '#00A650', fontWeight: 'bold' }}>
+              Objetivo: Ser un socio que ofrece inteligencia de negocio.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

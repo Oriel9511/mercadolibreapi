@@ -27,9 +27,9 @@ const Pillar1Func2 = () => {
             color: '#333333',
             marginBottom: '30px'
           }}>
-            1.2: Búsqueda Avanzada de Órdenes
+            Búsqueda Avanzada de Órdenes
           </h3>
-          
+
           <div style={{ marginBottom: '25px' }}>
             <p style={{
               fontSize: '20px',
@@ -47,7 +47,7 @@ const Pillar1Func2 = () => {
               Imposible buscar órdenes antiguas o generar reportes de ventas desde la aplicación.
             </p>
           </div>
-          
+
           <div>
             <p style={{
               fontSize: '20px',
@@ -69,7 +69,7 @@ const Pillar1Func2 = () => {
             </ul>
           </div>
         </div>
-        
+
         {/* Columna del Icono */}
         <div style={{
           background: '#FFFFFF',
